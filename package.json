@@ -1,0 +1,54 @@
+{
+  "name": "backbone.pageable",
+  "description": "Local and cached pagination for backbone collections with lazy loading to fetch more",
+  "version": "0.1.0-dev",
+  "keywords": ["javascript","backbone","plugin","collection","pagination","cache","client","browser"],
+  "author" : "Eric Hemesath <git@heme.net>",
+  "homepage": "https://github.com/heme/backbone.pageable",
+  "github": "https://github.com/heme/backbone.pageable",
+  "main": "./src/backbone.pageable.js",
+  "maintainers": [
+    {
+      "name": "Eric Hemesath",
+      "email": "git@heme.net",
+      "web": "https://github.com/heme" 
+    } 
+  ],
+  "contributors": [
+    {
+      "name": "Eric Hemesath",
+      "email": "git@heme.net",
+      "web": "https://github.com/heme" 
+    } 
+  ],
+  "bugs": {
+    "web": "https://github.com/heme/backbone.pageable/issues" 
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/mit-license.php",
+    }
+  ],
+  "repositories": [
+    {
+      "type": "git", 
+      "url": "http://github.com/heme/backbone.pageable.git"
+    }
+  ],
+  "dependencies": {
+    "backbone": "*",
+    "underscore": "*"
+  },
+  "jam": {
+    "dependencies": {
+      "backbone": "null",
+      "underscore": "null"
+    },
+    "main": "./src/backbone.pageable.js",
+    "include": [
+      "src/backbone.pageable.js",
+      "README"
+    ]
+  }
+}
