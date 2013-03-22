@@ -35,18 +35,19 @@
             initialize: function(){
                 this.pagination.setDefaults.call(this);
                 this.pagination.collection = this;
+                _.extend(this.pagination, new Backbone.Collection());
+                this.on("sync", this.pagination.setPage, this.pagination);
             },
             setDefaults: function(){
                 _.extend(this.pagination.request, this.pagination_request);
                 _.extend(this.pagination.state, this.pagination_state);
                 _.extend(this.pagination.querystring, this.pagination_querystring);
             },
-            fetch: function(){
-                var fetchCollection = new Backbone.Collection();
-                return fetchCollection.add(this.collection.slice(this.state.startRecord(), this.state.endRecord()));
-            },
-            toJSON: function(){
-                return this.collection.slice(begin, end);
+            setPage: function(){
+                this.reset([], []);
+                this.add(this.collection.slice(this.state.startRecord(), this.state.endRecord()));
+                this.collection.trigger('set');
+                this.collection.off("sync");
             }
         },
 
