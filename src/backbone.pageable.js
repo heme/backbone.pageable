@@ -1,8 +1,17 @@
-Backbone.Pageable = (function(Backbone, _) {
+(function (factory) {
+        "use strict";
+
+    if (typeof exports === 'object') {
+        module.exports = factory(require('backbone'), require('underscore'));
+    } else if (typeof define === 'function' && define.amd) {
+        define(['backbone', 'underscore'], factory);
+    } else {
+        return factory(Backbone, _);
+    }
+}(function (Backbone, _) {
     "use strict";
-    
-    var Pageble = {}
-    Pageable = Backbone.Collection.extend({
+
+    Backbone.Pageable = Backbone.Collection.extend({
 
         // Defaults
         pagination: {
@@ -49,6 +58,6 @@ Backbone.Pageable = (function(Backbone, _) {
 
     });
     
-    return Pageable;
+    return Backbone.Pageable;
 
-}(Backbone,_));  
+}));
