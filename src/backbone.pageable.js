@@ -23,7 +23,6 @@
                 dataType: 'json'
             },
             state: {
-                pages: [],
                 firstPage: 0,
                 currentPage: 0,
                 perPage: 10
@@ -31,7 +30,16 @@
                 totalRecords: function() { return (!this.collection) ? 0 : this.collection.models.length; },
                 startRecord: function() { var sr = (this.state.currentPage - 1) * this.state.perPage; return (sr > 0) ? sr : 0; },
                 endRecord: function() { return this.state.currentPage * this.state.perPage; },
-                totalPages: function() { var tp = ((!this.collection) ? 0 : this.collection.models.length) / this.state.perPage; return (tp > 1) ? tp : 1;
+                totalPages: function() { var tp = ((!this.collection) ? 0 : this.collection.models.length) / this.state.perPage; return (tp > 1) ? tp : 1; },
+                pages: function() {
+                    var pages = [];
+                    for(var x=0; x<this.state.totalPages; x++) {
+                        pages[x] = {
+                            'page-number':(x+1),
+                            'status': (x+1 == this.state.currentPage) ? 'active' : ''
+                        };
+                    }
+                    return pages;
                 }
             },
             querystring: {
@@ -61,12 +69,6 @@
                     }, this);
                     this[value] = _.extend(this[value], obj);
                  }, this);
-                 for(var x=0; x<this.state.totalPages; x++) {
-                    this.state.pages[x] = {
-                        'page-number':(x+1),
-                        'status': (x+1 == this.state.currentPage) ? 'active' : ''
-                    };
-                 }
             },
             init: function(){
                 this.pagination.setDefaults.call(this);
