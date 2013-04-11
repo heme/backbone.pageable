@@ -69,6 +69,7 @@
                     }, this);
                     this[value] = _.extend(this[value], obj);
                  }, this);
+                 this.state.pages = this._state.pages.call(this);
             },
             init: function(){
                 this.pagination.setDefaults.call(this);
