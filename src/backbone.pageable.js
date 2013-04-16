@@ -23,36 +23,58 @@
                 dataType: 'json'
             },
             state: {
-                firstPage: 0,
-                currentPage: 0,
-                perPage: 10
+                startIndex: null,
+                currentPage: 1,
+                perPage: 10,
+                startPage:1,
+                totalRecords:0,
+                totalPages:0,
+                pages:[],
+                percentage:0
             }, _state: {
-                totalRecords: function() { return (!this.collection) ? 0 : this.collection.models.length; },
-                startRecord: function() { var sr = (this.state.currentPage - 1) * this.state.perPage; return (sr > 0) ? sr : 0; },
-                endRecord: function() { return this.state.currentPage * this.state.perPage; },
-                totalPages: function() { var tp = ((!this.collection) ? 0 : this.collection.models.length) / this.state.perPage; return (tp > 1) ? tp : 1; },
+                startPage: function() {
+                    return (this.state.startIndex / this.state.perPage) + 1;
+                },
+                totalRecords: function() {
+                    return (!this.collection) ? 0 : this.collection.models.length;
+                },
+                pageStartRecord: function() {
+                    var sr = (this.state.currentPage - this.state.startPage) * this.state.perPage;
+                    return (sr > 0) ? sr : 0;
+                },
+                pageEndRecord: function() {
+                    return ((this.state.currentPage+1) - this.state.startPage) * this.state.perPage;
+                },
+                totalPages: function() {
+                    var tp = ((!this.collection) ? 0 : this.collection.models.length) / this.state.perPage;
+                    return (tp > 0) ? tp : 0;
+                },
+                percentage: function() {
+                    return (this.state.totalPages <= 0) ? 0 : (this.state.currentPage - this.state.startPage) / this.state.totalPages;
+                },
                 pages: function() {
                     var pages = [];
-                    for(var x=0; x<this.state.totalPages; x++) {
+                    var startPage = this.state.startPage;
+                    var x = 0;
+                    while(x < this.state.totalPages) {
                         pages[x] = {
-                            'page-number':(x+1),
-                            'status': (x+1 == this.state.currentPage) ? 'active' : ''
+                            'page-number':(x + this.state.startPage),
+                            'status': ((x + this.state.startPage) == this.state.currentPage) ? 'active' : ''
                         };
+                        ++x;
                     }
                     return pages;
                 }
             },
             querystring: {
+                'start':0,
                 'max': 100,
                 'orderby': null,
                 'sort': 'ASC'
             }, _querystring: {
                 'start': function() {
-                    if(!this.collection) {
-                        return parseInt((this.state.firstPage * this.state.perPage) / this.querystring.max, 10) * this.querystring.max;
-                    } else {
-                        return this.collection.models.length;
-                    }
+                    var next = +(this.collection !== null);
+                    return (parseInt((this.state.currentPage * this.state.perPage) / this.querystring.max, 10) + next) * this.querystring.max;
                 }
             },
             getState: function() {
@@ -72,23 +94,27 @@
                  this.state.pages = this._state.pages.call(this);
             },
             init: function(){
-                this.pagination.setDefaults.call(this);
+                this.pagination.setDefaults.apply(this, arguments);
                 this.pagination.collection = this;
                 _.extend(this.pagination, new Backbone.Collection());
                 this.on("sync", this.pagination.update, this.pagination);
-                this.pagination.listenToOnce(this, "sync", this.pagination.nextPage);
+                this.pagination.listenToOnce(this, "sync", this.pagination.changePage);
             },
-            setDefaults: function(){
-                _.extend(this.pagination._request, this.pagination_request);
+            setDefaults: function(options){
+                _.extend(this.pagination.request, this.pagination_request);
                 _.extend(this.pagination._state, this.pagination_state);
                 this.pagination._querystring.orderby = (this.pagination.querystring.orderby === null) ? this.model.prototype.idAttribute : null;
                 _.extend(this.pagination._querystring, this.pagination_querystring);
+                if(options.currentPage && options.currentPage > 0) {
+                    this.pagination.state.currentPage = +options.currentPage;
+                }
                 this.pagination.update.call(this.pagination);
+                this.pagination.state.startIndex = this.pagination.querystring.start;
             },
             changePage: function(){
                 this.update();
-                this.reset(this.collection.slice(this.state.startRecord, this.state.endRecord));
-                if(this.state.totalPages > 0 && this.state.currentPage / this.state.totalPages > 0.66) {
+                this.reset(this.collection.slice(this.state.pageStartRecord, this.state.pageEndRecord));
+                if(this.state.percentage > 0.66) {
                     this.collection.fetch({
                         data:this.querystring,
                         remove: false
@@ -97,13 +123,13 @@
             },
             nextPage: function(){
                 if(this.state.currentPage < this.state.totalPages) {
-                    this.state.currentPage = ++this.state.currentPage;
+                    ++this.state.currentPage;
                     this.changePage();
                 }
             },
             prevPage: function(){
                 if(this.state.currentPage > 1) {
-                    this.state.currentPage = --this.state.currentPage;
+                    --this.state.currentPage;
                     this.changePage();
                 }
             },
@@ -118,7 +144,7 @@
         // If Pageable is extended and this initialize is overwritten then 
         // you will need to make this same call in your initialize function
         initialize: function(){
-            this.pagination.init.call(this);
+            this.pagination.init.apply(this, arguments);
         },
 
         sync: function(method, model, options) {
@@ -129,7 +155,7 @@
         }
 
     });
-    
+
     return Backbone.Pageable;
 
 }));
