@@ -1,4 +1,4 @@
 backbone.pageable (0.1.0)
 =================
 
-Local cached pagination for backbone collections with lazy loading
+The goal of this project is to provide lazy-loaded pagination for backbone collections.
